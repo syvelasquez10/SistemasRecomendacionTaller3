@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Taller 3</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">SR Grupo 1 - Modelo Híbrido de Recomendaciones </a>
+      </nav>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+ 
+        {% for message in messages %}
+            {% if "Error" not in message[1]: %}
+                <div class="alert alert-info">
+                <strong>Success! </strong> {{ message[1] }}
+                </div>
+            {% endif %}
+ 
+            {% if "Error" in message[1]: %}
+                <div class="alert alert-warning">
+                {{ message[1] }}
+                </div>
+            {% endif %}
+        {% endfor %}
+            {% endif %}
+        {% endwith %}
+      <div class="container">
+          <br/>      
+        <h1>Buscar una nueva recomendación</h1>
+        <br>
+        <form action="" method="POST" role="form">
+          <div class="row form-group">
+            <div class="col-md-3">
+              <label>
+                Usuario:
+              </label>
+              <br>
+              <input type="text" name="user"  class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>
+                  Sistema de recomendación:
+                </label>
+                <br>
+                <select name="sr">
+                  <option value="ontologia">Ontologia</option>
+                  <option value="contenido">Contenido</option>
+                  <option value="pipeline">Pipeline</option>
+                </select>
+              </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary">Pedir Recomendación</button>
+            </div>
+          </div>
+        </form>
+        <br>
+        <br>
+        <div class="row">
+          {% if recomendacionesOntologia %}
+            <h2>Recomendaciones</h2>
+          {% endif%}
+          <div class="col-md-3">
+          {% for value in recomendacionesOntologia %}
+              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
+           {% endfor %}
+           {% for value in recomendacionesContenido %}
+              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
+           {% endfor %}
+          </div>
+          <div class="col-md-3">
+            {% for value in ratingsPipe %}
+              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
+            {% endfor %}
+          </div>
+        </div>
+        
+        
+        
+      </div>
+
+</body>
+</html>
