@@ -11,42 +11,48 @@ from wtforms import Form, TextField, TextAreaField, validators, StringField, Sub
 DEBUG = True
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '7d671f27d441z24367d481f2b6176p'
-
+movies_names = pd.read_csv('./data/movies.csv')
 movies_df = pd.read_csv('./data/moviesWithDBpedia.csv')
 similarities = pd.read_csv('./data/movies_tf_idf_similarities.csv',names= ['movie_1','movie_2','similarity'])
 reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1, rating_scale=(0.5, 5.0))
-#data = Dataset.load_from_file('./data/validationset.csv', reader=reader)
-#trainset = data.build_full_trainset()
+# data = Dataset.load_from_file('./data/validationset.csv', reader=reader)
+# trainset = data.build_full_trainset()
 rkmf = RKMFAlgorithm(n_epochs=1, n_factors=10)
 print('Comienza el fit')
-#rkmf.fit(trainset)
+# rkmf.fit(trainset)
 print('ya hizo el fit')
 ratings = pd.read_csv('./data/validationSet.csv')
 
 class ReusableForm(Form):
     user = TextField('Usuario:', validators=[validators.required()])
     sr = SelectField('SR', validators=[validators.required()])
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
     form = ReusableForm(request.form)
     recomendacionesOntologia = []
     recomendacionesContenido = []
-    ratingsPipe = []
+    ratingsOntologia = []
+    ratingsContenido = []
+    moviesUsuario = []
     if request.method == 'POST':
         user = request.form['user']
         sr = request.form['sr']
-        print(sr)
         if sr == 'ontologia':
             recomendacionesOntologia = getUserOntologyRecomendations(int(user))
         if sr == 'contenido':
             recomendacionesContenido = getContentRecomendation(int(user))
         if sr == 'pipeline':
             recomendacionesOntologia = getUserOntologyRecomendations(int(user))
-            print(recomendacionesOntologia)
             for recomendacion in recomendacionesOntologia:
-                ratingsPipe.append(getUserRKMFRating(int(user),recomendacion))
-            print(ratingsPipe)
-    return render_template('index.html', recomendacionesOntologia = recomendacionesOntologia, ratingsPipe = ratingsPipe, recomendacionesContenido = recomendacionesContenido)
+                ratingsOntologia.append([recomendacion,getOntologyRKMFRating(user,recomendacion)])
+            recomendacionesContenido = getContentRecomendation(int(user))
+            for recomendacion in recomendacionesContenido:
+                ratingsContenido.append([recomendacion, getContentRKMFRating(user,recomendacion)])
+            recomendacionesOntologia = []
+            recomendacionesContenido = []
+        moviesUsuario = getRatingsUsuario(int(user))
+    return render_template('index.html', recomendacionesOntologia = recomendacionesOntologia, recomendacionesContenido = recomendacionesContenido, ratingsOntologia = ratingsOntologia, ratingsContenido = ratingsContenido, moviesUsuario = moviesUsuario)
 
 def getMovieOntologyRecomendations(movie_id):
     link = movies_df[movies_df['movieId'] == movie_id]['dbpediaLink'].values[0]
@@ -92,11 +98,19 @@ def getUserOntologyRecomendations(user_id):
                         noEcontrado = False
     return recomendations
 
-def getUserRKMFRating(user_id,movie_link):
+def getOntologyRKMFRating(user_id,movie_link):
     movie_link = movie_link.replace('wikipedia.org/wiki/','dbpedia.org/resource/')
-    if any(movies_df[movies_df['dbpediaLink'] == movie_link]['movieId']):
-        movie_id = movies_df[movies_df['dbpediaLink'] == movie_link]['movieId'].values[0]
-        return rkmf.predict(user_id,movie_id).est
+    movie_id = movies_df[movies_df['dbpediaLink'] == movie_link]['movieId'] 
+    if any(movie_id):
+        movie_id = movie_id.values[0]
+        return rkmf.predict(str(user_id),str(movie_id)).est
+    return 'No se encuentra en el dataset'
+
+def getContentRKMFRating(user_id,movie_title):
+    movie_id = movies_df[movies_df['title'] == movie_title[0]]['movieId']
+    if any(movie_id):
+        movie_id = movie_id.values[0]
+        return rkmf.predict(str(user_id),str(movie_id)).est
     return 'No se encuentra en el dataset'
 
 def getContentRecomendation(user_id):
@@ -106,5 +120,22 @@ def getContentRecomendation(user_id):
         resultado = similarities[similarities['movie_1'] == movie].values
         for r in resultado:
             if r[2] > 0.9:
-                recomendations.append(movies[r[1]]['title'])
+                recomendations.append([movies_names[movies_names['movieId'] == r[1]]['title'].values[0], movies_names[movies_names['movieId'] == r[1]]['genres'].values[0]])
     return recomendations
+
+def getRatingsUsuario(user_id):
+    ratingsUser = []
+    sinNombrePelicula = ratings[ratings['userId'] == user_id].values
+    for value in sinNombrePelicula:
+        ratingsUser.append([movies_names[movies_names['movieId'] == value[1]]['title'].values[0], value[2]])
+    return ratingsUser
+
+@app.route("/cargar", methods=['POST'])
+def cargar():
+
+    return render_template('index.html')
+
+@app.route("/cargar2", methods=['POST'])
+def cargar2():
+    
+    return render_template('index.html')

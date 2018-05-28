@@ -44,16 +44,16 @@
               <input type="text" name="user"  class="form-control">
             </div>
             <div class="col-md-3">
-                <label>
-                  Sistema de recomendación:
-                </label>
-                <br>
-                <select name="sr">
-                  <option value="ontologia">Ontologia</option>
-                  <option value="contenido">Contenido</option>
-                  <option value="pipeline">Pipeline</option>
-                </select>
-              </div>
+              <label>
+                Sistema de recomendación:
+              </label>
+              <br>
+              <select name="sr">
+                <option value="ontologia">Ontologia</option>
+                <option value="contenido">Contenido</option>
+                <option value="pipeline">Pipeline</option>
+              </select>
+            </div>
           </div>
           <br>
           <div class="row">
@@ -62,30 +62,87 @@
             </div>
           </div>
         </form>
-        <br>
-        <br>
         <div class="row">
-          {% if recomendacionesOntologia %}
-            <h2>Recomendaciones</h2>
-          {% endif%}
           <div class="col-md-3">
-          {% for value in recomendacionesOntologia %}
-              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
-           {% endfor %}
-           {% for value in recomendacionesContenido %}
-              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
-           {% endfor %}
+            <form action="/cargar" method="POST" role="form">
+              <button type="submit" class="btn btn-secondary">Cargar Segundos datos</button>
+            </form>
           </div>
           <div class="col-md-3">
-            {% for value in ratingsPipe %}
-              <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
-            {% endfor %}
+            <form action="/cargar2" method="POST" role="form">
+              <button type="submit" class="btn btn-secondary">Cargar Segundos datos</button>
+            </form>
           </div>
         </div>
-        
-        
-        
+       
+        <br>
+        <br>
+        {% if recomendacionesOntologia or recomendacionesContenido or ratingsOntologia or ratingsContenido %}
+          <h2>Recomendaciones</h2>
+        {% endif%}
+        <div class="row">
+          {% if recomendacionesOntologia%}
+            <div class="col-md-3">
+            <h4>Ontologia</h4>
+            {% for value in recomendacionesOntologia %}
+                <dd><a href="{{value}}" target="_blank">{{value}}</a></dd>
+            {% endfor %}
+            </div>
+          {% endif%}
+          {% if recomendacionesContenido%}
+              <h4>Contenido</h4>
+              <br>
+              <div class="col-md-5">
+                  <div class="row">
+                {% for value in recomendacionesContenido %}
+                <div class="col-md-3">
+                  <dd><strong>{{value[0]}}</strong></dd>
+                  <br>
+                  <dd>{{value[1]}}</dd>
+                </div>
+                {% endfor %}
+                </div>
+              </div>
+          {% endif%}
+          {% if ratingsOntologia%}
+            <div class="col-md-5">
+              <h4>Ontologia</h4>
+              {% for value in ratingsOntologia %}
+                <dd><a href="{{value}}" target="_blank">{{value[0]}}</a></dd>
+                <br>
+                <dd>{{value[1]}}</dd>
+                <br>
+                <br>
+              {% endfor %}
+            </div>
+          {% endif%}
+          {% if ratingsContenido%}
+              <h4>Contenido</h4>
+              <br>
+              <div class="col-md-5">
+              {% for value in ratingsContenido %}
+                <div class="col-md-3">
+                  <dd><strong>{{value[0][0]}}</strong> {{value[0][1]}}</dd>
+                  <strong>{{value[1]}}</strong>
+                </div>
+              {% endfor %}
+              </div>
+          {% endif%}
+          </div>
+          <br>
+          <br>
+          {% if moviesUsuario %}
+          <h3>Ratings del usuario</h3>
+          <div class="row">
+            {% for value in moviesUsuario %}
+              <div class="col-md-3">
+                <dd><strong>{{value[0]}}</strong></dd>
+                <br>
+                <dd>{{value[1]}}</dd>
+              </div>
+            {% endfor %}
+          </div>
+          {% endif%}
       </div>
-
 </body>
 </html>
